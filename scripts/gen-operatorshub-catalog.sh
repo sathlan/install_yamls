@@ -25,18 +25,15 @@ fi
 
 echo OPERATOR_DIR ${OPERATOR_DIR}
 
-cat > ${OPERATOR_DIR}/operatorshub-catalog/operatorshub-catalog.yaml <<EOF_CAT
+cat > ${OPERATOR_DIR}/catalogsource.yaml <<EOF_CAT
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  name: operatorhubio-catalog
+  name: ${OPERATOR_SOURCE}
   namespace: openshift-marketplace
 spec:
   sourceType: grpc
-  image: quay.io/operatorhubio/catalog:latest
-  displayName: OperatorHub catalog
-  publisher: Operatorhub
-  updateStrategy:
-    registryPoll:
-      interval: 30m
+  image: brew.registry.redhat.io/rh-osbs/iib:892408
+  displayName: FOOBAR RHOSO Operator Catalog
+  publisher: grpc
 EOF_CAT

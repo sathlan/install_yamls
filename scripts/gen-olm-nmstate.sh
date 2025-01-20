@@ -48,6 +48,7 @@ spec:
   - openshift-nmstate
 EOF_CAT
 
+# ~/Src/contrib/openstack-k8s-operators/install_yamls/out/openstack-operators/nmstate/op
 cat > ${OPERATOR_DIR}/subscription.yaml <<EOF_CAT
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -60,9 +61,11 @@ spec:
   channel: stable
   installPlanApproval: Automatic
   name: ${SUBSCRIPTION}
-  source: redhat-operators
+  source: ${OPERATOR_SOURCE}
   sourceNamespace: openshift-marketplace
 EOF_CAT
+
+# ~/Src/contrib/openstack-k8s-operators/install_yamls/out/openshift-nmstate/nmstate/cr
 
 cat > ${DEPLOY_DIR}/deploy_operator.yaml <<EOF_CAT
 apiVersion: nmstate.io/v1

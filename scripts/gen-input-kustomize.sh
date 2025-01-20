@@ -107,3 +107,10 @@ generatorOptions:
   labels:
     type: ${SECRET}
 EOF
+
+if test $(oc get secret/redhat-registry |grep redhat-registry|wc -l) -eq 0 ; then
+
+    read -r username password < "${PODMAN_LOGIN_FILE}"
+    oc create secret generic redhat-registry --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"'"${username}"'": "'"${password}"'"}}'
+fi
+oc get secret/redhat-registry

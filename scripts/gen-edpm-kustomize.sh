@@ -125,6 +125,10 @@ cat <<EOF >>kustomization.yaml
       path: /spec/nodeTemplate/ansible/ansibleUser
       value: ${EDPM_ANSIBLE_USER:-"cloud-admin"}
     - op: replace
+      path: /spec/nodeTemplate/ansible/ansibleVarsFrom
+      value:
+        - {secretRef: {name: redhat-registry}}
+    - op: replace
       path: /spec/tlsEnabled
       value: ${EDPM_TLS_ENABLED}
 EOF

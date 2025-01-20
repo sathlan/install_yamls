@@ -728,6 +728,18 @@ openstack_prep: $(OPENSTACK_PREP_DEPS) ## creates the files to install the opera
 	$(eval $(call vars,$@,openstack))
 	bash scripts/gen-olm.sh
 
+.PHONY: openstack_prep_old_version
+openstack_prep_old_version: export IMAGE=${OPENSTACK_IMG}
+openstack_prep_old_version: $(OPENSTACK_PREP_DEPS) ## creates the files to install the operator using olm
+	$(eval $(call vars,$@,openstack))
+	bash scripts/gen-olm-old-version.sh
+
+.PHONY: openstack_old_version
+openstack_old_version: openstack_prep_old_version operator_namespace ## installs the operator, also runs the prep step. Set OPENSTACK_IMG for custom image.
+	$(eval $(call vars,$@,openstack))
+	oc apply -f ${OPERATOR_DIR}
+	bash scripts/install-manual-plan.sh
+
 .PHONY: openstack
 openstack: openstack_prep operator_namespace ## installs the operator, also runs the prep step. Set OPENSTACK_IMG for custom image.
 	$(eval $(call vars,$@,openstack))
@@ -737,7 +749,7 @@ openstack: openstack_prep operator_namespace ## installs the operator, also runs
 openstack_wait: ## waits openstack CSV to succeed.
 	$(eval $(call vars,$@,openstack))
 	# call make_openstack if it isn't already
-	bash -c '(oc get subscription -n openstack-operators openstack-operator || make openstack) || true'
+	bash -c '(oc get subscription -n openstack-operators openstack-operator || make openstack_old_version) || true'
 	timeout $(TIMEOUT) bash -c 'until $$(oc get csv -l operators.coreos.com/openstack-operator.openstack-operators -n ${OPERATOR_NAMESPACE} | grep -q Succeeded); do sleep 1; done'
 
 
@@ -792,6 +804,13 @@ ifeq ($(NETWORK_ISOLATION_USE_DEFAULT_NETWORK), false)
 	sed -i 's/192.168.122/${NNCP_CTLPLANE_IP_ADDRESS_PREFIX}/g' ${DEPLOY_DIR}/$(notdir ${OPENSTACK_CR})
 endif
 	bash scripts/gen-service-kustomize.sh
+
+.PHONY: openstack_deploy_old
+openstack_deploy_old: input openstack_deploy_prep netconfig_deploy ## installs the service instance using kustomize. Runs prep step in advance. Set OPENSTACK_REPO and OPENSTACK_BRANCH to deploy from a custom repo.
+	$(eval $(call vars,$@,openstack))
+	#make wait
+	bash scripts/operator-deploy-resources.sh
+
 
 .PHONY: openstack_deploy
 openstack_deploy: input openstack_deploy_prep netconfig_deploy ## installs the service instance using kustomize. Runs prep step in advance. Set OPENSTACK_REPO and OPENSTACK_BRANCH to deploy from a custom repo.
